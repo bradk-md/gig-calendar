@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gig Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#0e0e0f;--surface:#1a1a1c;--surface2:#242427;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+    --text:#f0ede8;--text2:#888;--text3:#555;
+    --accent:#e8c84a;--accent2:#c9a82e;--danger:#d94f4f;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:var(--surface);}
+  .logo{font-family:"Bebas Neue",sans-serif;font-size:28px;letter-spacing:2px;color:var(--accent);line-height:1;}
+  .logo span{color:var(--text2);font-size:13px;font-family:"DM Sans",sans-serif;letter-spacing:0;font-weight:300;display:block;margin-top:2px;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px;cursor:pointer;transition:background .15s;}
+  .btn:hover{background:var(--surface2);}
+  .btn-accent{background:var(--accent);color:#0e0e0f;border-color:var(--accent);font-weight:500;}
+  .btn-accent:hover{background:var(--accent2);border-color:var(--accent2);color:#0e0e0f;}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  .btn-ghost{border-color:transparent;color:var(--text2);}
+  .btn-ghost:hover{background:var(--surface2);color:var(--text);border-color:var(--border);}
+  .btn-danger{border-color:var(--danger);color:var(--danger);background:transparent;}
+  .btn-danger:hover{background:rgba(217,79,79,.12);}
+  .auth-badge{font-size:12px;color:var(--accent);background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.25);border-radius:20px;padding:4px 12px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:var(--surface);border-bottom:1px solid var(--border);}
+  .nav-month{display:flex;align-items:center;gap:12px;}
+  .month-label{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--text);min-width:180px;}
+  .nav-arrow{background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;}
+  .nav-arrow:hover{background:var(--surface2);color:var(--text);}
+  .tab-group{display:flex;gap:4px;}
+  .tab{background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text2);cursor:pointer;padding:6px 14px;font-family:"DM Sans",sans-serif;font-size:13px;transition:all .15s;}
+  .tab.active{background:var(--surface2);border-color:var(--border2);color:var(--text);}
+  .tab:hover:not(.active){color:var(--text);}
+  #calView{padding:0 20px 20px;}
+  .dow-row{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;padding:10px 0 6px;}
+  .dow-row span{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .day-cell{background:var(--surface);min-height:90px;padding:8px;cursor:default;transition:background .1s;}
+  .day-cell.clickable{cursor:pointer;}
+  .day-cell.clickable:hover{background:var(--surface2);}
+  .day-cell.other-month{background:#111113;}
+  .day-cell.other-month .day-num{color:var(--text3);}
+  .day-num{font-size:12px;color:var(--text2);margin-bottom:5px;}
+  .day-cell.today .day-num{background:var(--accent);color:#0e0e0f;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:500;}
+  .gig-pill{font-size:10px;padding:3px 7px;border-radius:4px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.3;}
+  .gig-pill:hover{opacity:.8;}
+  .p0{background:rgba(130,100,220,.25);color:#c4b0f5;border-left:2px solid #8264dc;}
+  .p1{background:rgba(60,180,130,.22);color:#7dd4b0;border-left:2px solid #3cb482;}
+  .p2{background:rgba(220,100,80,.22);color:#f0a090;border-left:2px solid #dc6450;}
+  .p3{background:rgba(232,200,74,.2);color:#e8c84a;border-left:2px solid #e8c84a;}
+  .p4{background:rgba(80,160,220,.22);color:#90c8f0;border-left:2px solid #50a0dc;}
+  .p5{background:rgba(220,80,140,.22);color:#f090c0;border-left:2px solid #dc508c;}
+  .add-hint{font-size:10px;color:var(--text3);margin-top:2px;}
+  #manageView{display:none;padding:24px 28px;}
+  .manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .manage-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+  .manage-card h3{font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:1px;color:var(--accent);margin-bottom:14px;}
+  .list-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);}
+  .list-item:last-child{border-bottom:none;}
+  .del-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:2px 6px;border-radius:4px;transition:color .15s,background .15s;}
+  .del-btn:hover{color:var(--danger);background:rgba(217,79,79,.1);}
+  .add-row{display:flex;gap:8px;margin-top:14px;}
+  .add-row input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px;outline:none;}
+  .add-row input:focus{border-color:var(--accent);}
+  #saveBanner{padding:12px 20px;font-size:13px;margin:12px 20px 0;display:none;border-radius:var(--radius);}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:100;}
+  .modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:390px;max-width:92vw;}
+  .modal h2{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:1px;color:var(--accent);margin-bottom:6px;}
+  .modal .sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+  .field select,.field input[type=text],.field input[type=password],.field input[type=time]{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:14px;outline:none;}
+  .field select:focus,.field input:focus{border-color:var(--accent);}
+  .field select option{background:var(--surface2);}
+  .modal-btns{display:flex;gap:8px;margin-top:20px;}
+  .modal-btns .btn{flex:1;justify-content:center;}
+  .err-msg{font-size:12px;color:var(--danger);margin-top:8px;min-height:16px;}
+  .pat-hint{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5;}
+  .status-line{font-size:12px;color:var(--text2);margin-top:8px;min-height:16px;}
+</style>
+</head>
+<body>
+
+<script>
+const CONFIG={GITHUB_USER:"bradk-md",GITHUB_REPO:"gig-calendar",DATA_FILE:"data/gigs.json",ADMIN_PASSWORD:"LiveMusic"};
+</script>
+
+<header>
+  <div class="logo">Gig Calendar<span>Your shows, all in one place</span></div>
+  <div class="header-right">
+    <span class="auth-badge" id="authBadge" style="display:none">Admin mode</span>
+    <button class="btn btn-sm" id="adminBtn" onclick="handleAdminBtn()">Admin</button>
+  </div>
+</header>
+
+<div id="saveBanner"><span id="saveBannerMsg"></span></div>
+
+<nav>
+  <div class="nav-month">
+    <button class="nav-arrow" onclick="changeMonth(-1)">&larr;</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button class="nav-arrow" onclick="changeMonth(1)">&rarr;</button>
+  </div>
+  <div class="tab-group">
+    <button class="tab active" onclick="switchView('cal',this)">Calendar</button>
+    <button class="tab" onclick="switchView('manage',this)">Manage Lists</button>
+  </div>
+</nav>
+
+<div id="calView">
+  <div class="dow-row"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<div id="manageView">
+  <div class="manage-grid">
+    <div class="manage-card">
+      <h3>Bands</h3>
+      <div id="bandList"></div>
+      <div class="add-row" id="addBandRow" style="display:none">
+        <input type="text" id="newBandInput" placeholder="Band name..." onkeydown="if(event.key==='Enter')addBand()" />
+        <button class="btn btn-sm btn-accent" onclick="addBand()">Add</button>
+      </div>
+    </div>
+    <div class="manage-card">
+      <h3>Venues</h3>
+      <div id="venueList"></div>
+      <div class="add-row" id="addVenueRow" style="display:none">
+        <input type="text" id="newVenueInput" placeholder="Venue name..." onkeydown="if(event.key==='Enter')addVenue()" />
+        <button class="btn btn-sm btn-accent" onclick="addVenue()">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="overlay" id="authOverlay" style="display:none" onclick="if(event.target===this)closeAuth()">
+  <div class="modal">
+    <h2>Admin Login</h2>
+    <div class="sub">Enter your password and GitHub token to enable editing. The token is never saved to disk &mdash; it only lives in memory while you are logged in this session.</div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')document.getElementById('patInput').focus()" />
+    </div>
+    <div class="field">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="patInput" placeholder="github_pat_..." onkeydown="if(event.key==='Enter')submitAuth()" />
+      <div class="pat-hint">Needs repo read/write scope. Retrieve from Bitwarden and paste here each session.</div>
+    </div>
+    <div class="err-msg" id="pwErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeAuth()">Cancel</button>
+      <button class="btn btn-accent" onclick="submitAuth()">Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gig Modal -->
+<div class="overlay" id="gigOverlay" style="display:none" onclick="if(event.target===this)closeGig()">
+  <div class="modal">
+    <h2 id="gigModalTitle">Add Gig</h2>
+    <div class="sub" id="gigModalSub"></div>
+    <div class="field"><label>Band</label><select id="gigBandSel"></select></div>
+    <div class="field"><label>Venue</label><select id="gigVenueSel"></select></div>
+    <div class="field"><label>Start Time</label><input type="time" id="gigTime" value="20:00" /></div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="gigNotes" placeholder="e.g. doors at 7, special event..." /></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeGig()">Cancel</button>
+      <button class="btn btn-danger" id="delGigBtn" onclick="deleteGig()" style="display:none">Delete</button>
+      <button class="btn btn-accent" onclick="saveGig()">Save Gig</button>
+    </div>
+    <div class="status-line" id="gigStatusLine"></div>
+  </div>
+</div>
+
+<script>
+let S={authed:false,pat:null,view:"cal",month:new Date().getMonth(),year:new Date().getFullYear(),gigs:{},bands:[],venues:[],sha:null,editDate:null,editIdx:null};
+const DEFAULTS={bands:["Betty White Stripes","Fizz","Petty Coat Junction","The Regal Beagles","Technicolor Motor Home"],venues:["Baileys on the Bay","Bare Bones","Club 66","Encore","Fish Head Cantina","McAvoy's","Red Eye","Rumor Reel","Stables"]};
+const COLORS=["p0","p1","p2","p3","p4","p5"];
+function pillColor(b){return COLORS[Math.max(0,S.bands.indexOf(b))%COLORS.length];}
+
+async function loadData(){
+  try{
+    const res=await fetch(`https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_FILE}`,{headers:{Accept:"application/vnd.github.v3+json"}});
+    if(res.status===404){S.bands=[...DEFAULTS.bands];S.venues=[...DEFAULTS.venues];S.sha=null;}
+    else{const j=await res.json();S.sha=j.sha;const d=JSON.parse(atob(j.content.replace(/\n/g,"")));S.gigs=d.gigs||{};S.bands=d.bands&&d.bands.length?d.bands:[...DEFAULTS.bands];S.venues=d.venues&&d.venues.length?d.venues:[...DEFAULTS.venues];}
+  }catch(e){S.bands=[...DEFAULTS.bands];S.venues=[...DEFAULTS.venues];}
+  renderAll();
+}
+
+async function saveData(){
+  if(!S.pat)return;
+  showBanner("Saving...","saving");
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify({gigs:S.gigs,bands:S.bands,venues:S.venues},null,2))));
+  const body={message:"Update gig data",content};
+  if(S.sha)body.sha=S.sha;
+  try{
+    const res=await fetch(`https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_FILE}`,{method:"PUT",headers:{Authorization:`token ${S.pat}`,Accept:"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!res.ok)throw new Error(res.status);
+    const j=await res.json();S.sha=j.content?.sha;
+    showBanner("Saved!","ok");setTimeout(hideBanner,2500);
+  }catch(e){showBanner("Save failed - check your token","err");}
+}
+
+function showBanner(msg,type){
+  const b=document.getElementById("saveBanner"),m=document.getElementById("saveBannerMsg");
+  const s={saving:["rgba(232,200,74,.1)","rgba(232,200,74,.3)","#e8c84a"],ok:["rgba(60,180,130,.1)","rgba(60,180,130,.3)","#7dd4b0"],err:["rgba(217,79,79,.1)","rgba(217,79,79,.3)","#f0a090"]};
+  const[bg,border,color]=s[type]||s.saving;
+  b.style.cssText=`display:block;background:${bg};border:1px solid ${border};color:${color};padding:12px 20px;font-size:13px;margin:12px 20px 0;border-radius:var(--radius)`;
+  m.textContent=msg;
+}
+function hideBanner(){document.getElementById("saveBanner").style.display="none";}
+function renderAll(){renderCalendar();if(S.view==="manage")renderManage();}
+
+function renderCalendar(){
+  document.getElementById("monthLabel").textContent=new Date(S.year,S.month,1).toLocaleString("default",{month:"long",year:"numeric"}).toUpperCase();
+  const firstDow=new Date(S.year,S.month,1).getDay(),dim=new Date(S.year,S.month+1,0).getDate(),today=fmtDate(new Date());
+  let html="";
+  for(let i=0;i<firstDow;i++){const p=new Date(S.year,S.month,1-firstDow+i);html+=`<div class="day-cell other-month"><div class="day-num">${p.getDate()}</div></div>`;}
+  for(let d=1;d<=dim;d++){
+    const ds=`${S.year}-${pad(S.month+1)}-${pad(d)}`,isToday=ds===today,dg=S.gigs[ds]||[];
+    const gh=dg.map((g,i)=>{const t=g.time?fmtTime(g.time):"";const ec=S.authed?`onclick="event.stopPropagation();openEditGig('${ds}',${i})"`:"";return`<div class="gig-pill ${pillColor(g.band)}" title="${g.band} @ ${g.venue}${t?" - "+t:""}" ${ec}>${g.band}<br><span style="opacity:.7;font-size:9px">${g.venue}${t?" - "+t:""}</span></div>`;}).join("");
+    const c=S.authed?" clickable":"",cl=S.authed?`onclick="openAddGig('${ds}')"` :"";
+    html+=`<div class="day-cell${c}${isToday?" today":""}" ${cl}><div class="day-num">${d}</div>${gh}${S.authed&&!dg.length?'<div class="add-hint">+ add gig</div>':""}</div>`;
+  }
+  const tr=(firstDow+dim)%7;for(let i=0;i<(tr?7-tr:0);i++)html+=`<div class="day-cell other-month"><div class="day-num">${i+1}</div></div>`;
+  document.getElementById("calGrid").innerHTML=html;
+}
+
+function renderManage(){
+  const can=S.authed;
+  document.getElementById("bandList").innerHTML=S.bands.map((b,i)=>`<div class="list-item"><span>${b}</span>${can?`<button class="del-btn" onclick="removeBand(${i})">&#10005;</button>`:""}</div>`).join("")||'<div style="color:var(--text3);font-size:13px">No bands yet</div>';
+  document.getElementById("venueList").innerHTML=S.venues.map((v,i)=>`<div class="list-item"><span>${v}</span>${can?`<button class="del-btn" onclick="removeVenue(${i})">&#10005;</button>`:""}</div>`).join("")||'<div style="color:var(--text3);font-size:13px">No venues yet</div>';
+  document.getElementById("addBandRow").style.display=can?"flex":"none";
+  document.getElementById("addVenueRow").style.display=can?"flex":"none";
+}
+
+function changeMonth(dir){S.month+=dir;if(S.month>11){S.month=0;S.year++;}if(S.month<0){S.month=11;S.year--;}renderCalendar();}
+function switchView(v,btn){S.view=v;document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));btn.classList.add("active");document.getElementById("calView").style.display=v==="cal"?"":"none";document.getElementById("manageView").style.display=v==="manage"?"":"none";if(v==="manage")renderManage();}
+function handleAdminBtn(){if(S.authed){S.authed=false;S.pat=null;document.getElementById("authBadge").style.display="none";document.getElementById("adminBtn").textContent="Admin";renderAll();}else{document.getElementById("pwInput").value="";document.getElementById("patInput").value="";document.getElementById("pwErr").textContent="";document.getElementById("authOverlay").style.display="flex";setTimeout(()=>document.getElementById("pwInput").focus(),50);}}
+function closeAuth(){document.getElementById("authOverlay").style.display="none";}
+function submitAuth(){const pw=document.getElementById("pwInput").value,pat=document.getElementById("patInput").value.trim();if(pw!==CONFIG.ADMIN_PASSWORD){document.getElementById("pwErr").textContent="Incorrect password.";return;}if(!pat){document.getElementById("pwErr").textContent="Please enter your GitHub token.";return;}S.authed=true;S.pat=pat;document.getElementById("authBadge").style.display="";document.getElementById("adminBtn").textContent="Log out";closeAuth();renderAll();}
+function populateSelects(){document.getElementById("gigBandSel").innerHTML=S.bands.map(b=>`<option value="${b}">${b}</option>`).join("");document.getElementById("gigVenueSel").innerHTML=S.venues.map(v=>`<option value="${v}">${v}</option>`).join("");}
+function openAddGig(ds){if(!S.authed)return;S.editDate=ds;S.editIdx=null;document.getElementById("gigModalTitle").textContent="Add Gig";document.getElementById("gigModalSub").textContent=new Date(ds+"T12:00:00").toLocaleDateString("default",{weekday:"long",month:"long",day:"numeric",year:"numeric"});populateSelects();document.getElementById("gigTime").value="20:00";document.getElementById("gigNotes").value="";document.getElementById("delGigBtn").style.display="none";document.getElementById("gigStatusLine").textContent="";document.getElementById("gigOverlay").style.display="flex";}
+function openEditGig(ds,idx){if(!S.authed)return;S.editDate=ds;S.editIdx=idx;const g=S.gigs[ds][idx];document.getElementById("gigModalTitle").textContent="Edit Gig";document.getElementById("gigModalSub").textContent=new Date(ds+"T12:00:00").toLocaleDateString("default",{weekday:"long",month:"long",day:"numeric",year:"numeric"});populateSelects();document.getElementById("gigBandSel").value=g.band;document.getElementById("gigVenueSel").value=g.venue;document.getElementById("gigTime").value=g.time||"20:00";document.getElementById("gigNotes").value=g.notes||"";document.getElementById("delGigBtn").style.display="";document.getElementById("gigStatusLine").textContent="";document.getElementById("gigOverlay").style.display="flex";}
+function closeGig(){document.getElementById("gigOverlay").style.display="none";}
+async function saveGig(){const gig={band:document.getElementById("gigBandSel").value,venue:document.getElementById("gigVenueSel").value,time:document.getElementById("gigTime").value,notes:document.getElementById("gigNotes").value.trim()};const ds=S.editDate;if(!S.gigs[ds])S.gigs[ds]=[];if(S.editIdx!==null)S.gigs[ds][S.editIdx]=gig;else S.gigs[ds].push(gig);closeGig();renderCalendar();await saveData();}
+async function deleteGig(){if(!confirm("Delete this gig?"))return;S.gigs[S.editDate].splice(S.editIdx,1);if(!S.gigs[S.editDate].length)delete S.gigs[S.editDate];closeGig();renderCalendar();await saveData();}
+function addBand(){const v=document.getElementById("newBandInput").value.trim();if(!v)return;S.bands.push(v);S.bands.sort((a,b)=>a.localeCompare(b));document.getElementById("newBandInput").value="";renderManage();saveData();}
+function removeBand(i){if(!confirm(`Remove "${S.bands[i]}"?`))return;S.bands.splice(i,1);renderManage();saveData();}
+function addVenue(){const v=document.getElementById("newVenueInput").value.trim();if(!v)return;S.venues.push(v);S.venues.sort((a,b)=>a.localeCompare(b));document.getElementById("newVenueInput").value="";renderManage();saveData();}
+function removeVenue(i){if(!confirm(`Remove "${S.venues[i]}"?`))return;S.venues.splice(i,1);renderManage();saveData();}
+function fmtDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function pad(n){return String(n).padStart(2,"0");}
+function fmtTime(t){if(!t)return"";const[h,m]=t.split(":");return`${+h%12||12}:${m}${+h>=12?"pm":"am"}`;}
+loadData();
+</script>
+</body>
+</html>
