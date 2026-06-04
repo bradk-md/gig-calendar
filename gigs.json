@@ -79,6 +79,14 @@
         "time": "20:00",
         "notes": ""
       }
+    ],
+    "2026-07-12": [
+      {
+        "band": "Fizz",
+        "venue": "Baileys on the Bay",
+        "time": "16:00",
+        "notes": "4-8 PM"
+      }
     ]
   },
   "bands": [
