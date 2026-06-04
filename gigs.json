@@ -87,6 +87,14 @@
         "time": "16:00",
         "notes": "4-8 PM"
       }
+    ],
+    "2026-07-17": [
+      {
+        "band": "Betty White Stripes",
+        "venue": "Music on Main Reisterstown",
+        "time": "19:00",
+        "notes": "7-9 PM"
+      }
     ]
   },
   "bands": [
