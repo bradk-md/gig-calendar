@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gig Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#edeae3;--surface:#faf8f4;--surface2:#e8e4dc;--surface3:#dedad0;
+    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
+    --text:#1a1814;--text2:#6b6557;--text3:#b0a898;
+    --accent:#9a4218;--accent2:#7a3010;--accentbg:#f9ede6;
+    --green:#256840;--greenbg:#dff0e6;
+    --danger:#c0392b;--dangerbg:#fdf0ef;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);}
+  .logo-wrap{display:flex;align-items:center;gap:14px;}
+  .logo-icon{width:70px;height:52px;flex-shrink:0;object-fit:contain;}
+  .logo{font-family:"Bebas Neue",sans-serif;font-size:26px;letter-spacing:2px;color:var(--accent);line-height:1;}
+  .logo span{color:#2e2a26;font-size:12px;font-family:"DM Sans",sans-serif;letter-spacing:0;font-weight:300;display:block;margin-top:2px;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px;cursor:pointer;transition:background .15s;}
+  .btn:hover{background:var(--surface2);}
+  .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500;}
+  .btn-accent:hover{background:var(--accent2);border-color:var(--accent2);}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  .btn-ghost{border-color:transparent;color:var(--text2);background:transparent;}
+  .btn-ghost:hover{background:var(--surface2);color:var(--text);border-color:var(--border);}
+  .btn-danger{border-color:var(--danger);color:var(--danger);background:transparent;}
+  .btn-danger:hover{background:var(--dangerbg);}
+  .auth-badge{font-size:12px;color:var(--green);background:var(--greenbg);border:1px solid rgba(42,122,75,.25);border-radius:20px;padding:4px 12px;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;background:var(--surface);border-bottom:1px solid var(--border);}
+  .nav-month{display:flex;align-items:center;gap:12px;}
+  .month-label{font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--text);min-width:170px;}
+  .nav-arrow{background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;}
+  .nav-arrow:hover{background:var(--surface2);color:var(--text);}
+  .tab-group{display:flex;gap:4px;}
+  .tab{background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text2);cursor:pointer;padding:6px 14px;font-family:"DM Sans",sans-serif;font-size:13px;transition:all .15s;}
+  .tab.active{background:var(--surface2);border-color:var(--border2);color:var(--text);font-weight:500;}
+  .tab:hover:not(.active){color:var(--text);}
+
+  #saveBanner{padding:11px 20px;font-size:13px;margin:10px 20px 0;display:none;border-radius:var(--radius);}
+
+  #calView{padding:0 20px 28px;}
+  .dow-row{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;padding:10px 0 5px;}
+  .dow-row span{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .day-cell{background:var(--surface);min-height:88px;padding:7px 8px;cursor:default;transition:background .1s;}
+  .day-cell.clickable{cursor:pointer;}
+  .day-cell.clickable:hover{background:#e8e2d8;}
+  .day-cell.other-month{background:var(--surface2);}
+  .day-cell.other-month .day-num{color:var(--text3);}
+  .day-num{font-size:12px;color:var(--text2);margin-bottom:4px;}
+  .day-cell.today .day-num{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:500;}
+  .gig-pill{font-size:10px;padding:3px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.35;}
+  .gig-pill:hover{opacity:.8;}
+  .p0{background:#e4e0f4;color:#3e3288;border-left:2px solid #6a5fc0;}
+  .p1{background:#d8f0e4;color:#1a5e38;border-left:2px solid #329858;}
+  .p2{background:#f5e4de;color:#883018;border-left:2px solid #c05030;}
+  .p3{background:#f2e8ce;color:#7a5208;border-left:2px solid #c09018;}
+  .p4{background:#dce8f5;color:#164480;border-left:2px solid #3880c0;}
+  .p5{background:#f0dcea;color:#7a1858;border-left:2px solid #c04890;}
+  .add-hint{font-size:10px;color:var(--text3);margin-top:2px;}
+
+  #manageView{display:none;padding:24px 28px;}
+  .manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .manage-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+  .manage-card h3{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:1px;color:var(--accent);margin-bottom:12px;}
+  .list-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);}
+  .list-item:last-child{border-bottom:none;}
+  .del-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 6px;border-radius:4px;transition:color .15s,background .15s;line-height:1;}
+  .del-btn:hover{color:var(--danger);background:var(--dangerbg);}
+  .add-row{display:flex;gap:8px;margin-top:12px;}
+  .add-row input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px;outline:none;}
+  .add-row input:focus{border-color:var(--accent);}
+  .empty-list{color:var(--text3);font-size:13px;padding:4px 0;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;}
+  .modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:390px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,.12);}
+  .modal h2{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:1px;color:var(--accent);margin-bottom:5px;}
+  .modal .sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5;}
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
+  .field select,.field input[type=text],.field input[type=password],.field input[type=time]{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:14px;outline:none;}
+  .field select:focus,.field input:focus{border-color:var(--accent);}
+  .modal-btns{display:flex;gap:8px;margin-top:18px;}
+  .modal-btns .btn{flex:1;justify-content:center;}
+  .err-msg{font-size:12px;color:var(--danger);margin-top:7px;min-height:15px;}
+  .pat-hint{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5;}
+  .status-line{font-size:12px;color:var(--text2);margin-top:7px;min-height:15px;}
+  .venue-item{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);}
+  .venue-item:last-child{border-bottom:none;}
+  .venue-item-left{display:flex;flex-direction:column;gap:4px;flex:1;margin-right:8px;}
+  .venue-name{font-size:13px;color:var(--text);font-weight:500;}
+  .venue-addr-input{font-size:12px;padding:4px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface2);color:var(--text);font-family:"DM Sans",sans-serif;outline:none;width:100%;}
+  .venue-addr-input:focus{border-color:var(--accent);}
+  .venue-addr-text{font-size:12px;color:var(--text2);}
+
+  /* ══════════════════════════════════════
+     MOBILE & TABLET RESPONSIVE
+     ══════════════════════════════════════ */
+
+  /* Tablet (≤768px) */
+  @media (max-width: 768px) {
+    header { padding: 12px 16px; }
+    .logo { font-size: 22px; }
+    .logo span { font-size: 11px; }
+    .logo-icon { width: 46px; height: 34px; }
+    .logo-wrap { gap: 10px; }
+    .auth-badge { display: none; } /* save space — admin button already shows state */
+    nav { padding: 8px 12px; flex-wrap: wrap; gap: 8px; }
+    .month-label { font-size: 17px; min-width: 140px; }
+    .tab { padding: 5px 10px; font-size: 12px; }
+    #calView { padding: 0 10px 20px; }
+    #filterBar { padding: 8px 10px 0; }
+    #filterBar label { font-size: 11px; }
+    #filterBar select { font-size: 12px; padding: 4px 8px; }
+    .dow-row span { font-size: 9px; letter-spacing: 0; }
+    .cal-grid { border-radius: 6px; }
+    .day-cell { min-height: 60px; padding: 4px 5px; }
+    .day-num { font-size: 11px; margin-bottom: 3px; }
+    .day-cell.today .day-num { width: 19px; height: 19px; font-size: 10px; }
+    .gig-pill { font-size: 9px; padding: 2px 4px; }
+    .gig-pill span { display: none; } /* hide venue/time on tablet, just show band */
+    .add-hint { font-size: 9px; }
+    .manage-grid { grid-template-columns: 1fr; gap: 16px; }
+    #manageView { padding: 16px; }
+    .manage-card { padding: 14px; }
+    .modal { padding: 20px; width: 340px; }
+  }
+
+  /* Phone (≤480px) */
+  @media (max-width: 480px) {
+    header { padding: 10px 12px; }
+    .logo { font-size: 19px; }
+    .logo span { display: none; } /* hide tagline on small phones */
+    .logo-icon { width: 38px; height: 28px; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    nav { padding: 6px 10px; gap: 6px; }
+    .month-label { font-size: 15px; min-width: 120px; }
+    .nav-arrow { width: 26px; height: 26px; font-size: 13px; }
+    .tab { padding: 4px 8px; font-size: 11px; }
+    #calView { padding: 0 6px 16px; }
+    #filterBar { padding: 6px 6px 0; }
+    .dow-row { padding: 6px 0 4px; }
+    .dow-row span { font-size: 8px; }
+    .day-cell { min-height: 48px; padding: 3px 3px; }
+    .day-num { font-size: 10px; margin-bottom: 2px; }
+    .day-cell.today .day-num { width: 17px; height: 17px; font-size: 9px; }
+    .gig-pill { font-size: 8px; padding: 2px 3px; border-radius: 3px; border-left-width: 2px; line-height: 1.2; }
+    .gig-pill br { display: none; }
+    .gig-pill span { display: none; }
+    .add-hint { display: none; } /* too small to show on phone */
+    #manageView { padding: 12px; }
+    .manage-card { padding: 12px; }
+    .manage-card h3 { font-size: 15px; margin-bottom: 10px; }
+    .list-item { font-size: 12px; padding: 7px 0; }
+    .add-row input { font-size: 12px; padding: 7px 8px; }
+    .modal { padding: 18px; width: 95vw; }
+    .modal h2 { font-size: 18px; }
+    .modal .sub { font-size: 12px; margin-bottom: 14px; }
+    .field label { font-size: 10px; }
+    .field select, .field input[type=text], .field input[type=password], .field input[type=time] {
+      font-size: 16px; /* prevents iOS zoom on focus */
+      padding: 10px 10px;
+    }
+    .modal-btns { gap: 6px; margin-top: 14px; }
+    .btn { font-size: 12px; padding: 8px 12px; }
+    #saveBanner { margin: 8px 6px 0; font-size: 12px; }
+  }
+
+  /* Very small phones (≤360px) */
+  @media (max-width: 360px) {
+    .day-cell { min-height: 42px; }
+    .gig-pill { font-size: 7px; padding: 1px 2px; }
+    .month-label { min-width: 100px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<script>
+const CONFIG={GITHUB_USER:"bradk-md",GITHUB_REPO:"gig-calendar",DATA_FILE:"gigs.json",ADMIN_PASSWORD:"LiveMusic"};
+</script>
+
+<header>
+  <div class="logo-wrap">
+    <img class="logo-icon" src="data:image/png;base64,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" alt="Electric guitar" />
+    <div>
+      <div class="logo">Gig Calendar<span>Mike's shows, all in one place</span></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="auth-badge" id="authBadge" style="display:none">&#10003; Admin mode</span>
+    <button class="btn btn-sm" id="adminBtn" onclick="handleAdminBtn()">&#128274; Admin</button>
+  </div>
+</header>
+
+<div id="saveBanner"><span id="saveBannerMsg"></span></div>
+
+<nav>
+  <div class="nav-month">
+    <button class="nav-arrow" onclick="changeMonth(-1)">&larr;</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button class="nav-arrow" onclick="changeMonth(1)">&rarr;</button>
+  </div>
+  <div class="tab-group">
+    <button class="tab active" onclick="switchView('cal',this)">Calendar</button>
+    <button class="tab" id="manageTab" onclick="switchView('manage',this)" style="display:none">Manage Lists</button>
+  </div>
+</nav>
+
+<div id="filterBar" style="display:none;padding:10px 20px 0;background:var(--bg);">
+  <label style="font-size:12px;color:var(--text2);font-weight:500;letter-spacing:.4px;text-transform:uppercase;margin-right:8px;">Filter by band:</label>
+  <select id="bandFilter" onchange="applyFilter()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);outline:none;cursor:pointer;">
+    <option value="ALL">All bands</option>
+  </select>
+</div>
+<div id="calView">
+  <div class="dow-row"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<div id="manageView">
+  <div class="manage-grid">
+    <div class="manage-card">
+      <h3>Bands</h3>
+      <div id="bandList"></div>
+      <div class="add-row" id="addBandRow" style="display:none">
+        <input type="text" id="newBandInput" placeholder="Band name..." onkeydown="if(event.key==='Enter')addBand()" />
+        <button class="btn btn-sm btn-accent" onclick="addBand()">Add</button>
+      </div>
+    </div>
+    <div class="manage-card">
+      <h3>Venues</h3>
+      <div id="venueList"></div>
+      <div class="add-row" id="addVenueRow" style="display:none">
+        <input type="text" id="newVenueInput" placeholder="Venue name..." onkeydown="if(event.key==='Enter')addVenue()" />
+        <button class="btn btn-sm btn-accent" onclick="addVenue()">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="overlay" id="authOverlay" style="display:none" onclick="if(event.target===this)closeAuth()">
+  <div class="modal">
+    <h2>Admin Login</h2>
+    <div class="sub">Enter your password and GitHub token to enable editing. The token is never saved &mdash; it only lives in memory while you are logged in.</div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')document.getElementById('patInput').focus()" />
+    </div>
+    <div class="field">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="patInput" placeholder="github_pat_..." onkeydown="if(event.key==='Enter')submitAuth()" />
+      <div class="pat-hint">Needs repo read/write scope. Grab from Bitwarden and paste here each session.</div>
+    </div>
+    <div class="err-msg" id="pwErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeAuth()">Cancel</button>
+      <button class="btn btn-accent" onclick="submitAuth()">Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gig Modal -->
+<div class="overlay" id="gigOverlay" style="display:none" onclick="if(event.target===this)closeGig()">
+  <div class="modal">
+    <h2 id="gigModalTitle">Add Gig</h2>
+    <div class="sub" id="gigModalSub"></div>
+    <div class="field"><label>Band</label><select id="gigBandSel"></select></div>
+    <div class="field"><label>Venue</label><select id="gigVenueSel"></select></div>
+    <div class="field"><label>Start Time</label><input type="time" id="gigTime" value="20:00" /></div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="gigNotes" placeholder="e.g. doors at 7, special event..." /></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeGig()">Cancel</button>
+      <button class="btn btn-danger" id="delGigBtn" onclick="deleteGig()" style="display:none">Delete</button>
+      <button class="btn btn-accent" onclick="saveGig()">Save Gig</button>
+    </div>
+    <div class="status-line" id="gigStatusLine"></div>
+  </div>
+</div>
+
+
+<!-- Gig Info Panel (slide up) -->
+<div id="gigInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;" onclick="closeGigInfo()"></div>
+<div id="gigInfoPanel" style="position:fixed;bottom:-100%;left:0;right:0;z-index:201;transition:bottom 0.3s ease;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -4px 32px rgba(0,0,0,0.15);padding:0 0 32px 0;max-height:85vh;overflow-y:auto;">
+  <div style="text-align:center;padding:12px 0 4px;">
+    <div style="width:40px;height:4px;background:var(--border2);border-radius:2px;display:inline-block;"></div>
+  </div>
+  <div style="padding:0 24px 0;">
+    <div id="gigInfoDate" style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;"></div>
+    <div id="gigInfoBand" style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--accent);line-height:1.1;margin-bottom:4px;"></div>
+    <div id="gigInfoVenue" style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:4px;"></div>
+    <div id="gigInfoAddr" style="font-size:13px;color:var(--text2);margin-bottom:4px;"></div>
+    <div id="gigInfoTime" style="font-size:13px;color:var(--text2);margin-bottom:4px;"></div>
+    <div id="gigInfoNotes" style="font-size:13px;color:var(--text2);margin-bottom:20px;font-style:italic;"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+    <div id="gigInfoMapBtn" style="display:none;">
+      <a id="gigInfoMapLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;text-decoration:none;padding:11px 20px;border-radius:var(--radius);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Get Directions
+      </a>
+    </div>
+    <button id="gigInfoEditBtn" style="display:none;padding:11px 20px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" onclick="gigInfoEdit()">Edit Gig</button>
+  </div>
+    <div id="gigInfoMulti" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Also this day</div>
+      <div id="gigInfoMultiList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let S={authed:false,pat:null,view:"cal",filter:"ALL",month:new Date().getMonth(),year:new Date().getFullYear(),gigs:{},bands:[],venues:[],sha:null,editDate:null,editIdx:null};
+const DEFAULTS={
+  bands:["Betty White Stripes","Fizz","Petty Coat Junction","The Regal Beagles","Technicolor Motor Home"],
+  venues:[
+    {name:"Baileys on the Bay",address:""},
+    {name:"Bare Bones",address:""},
+    {name:"Club 66",address:""},
+    {name:"Encore",address:""},
+    {name:"Fish Head Cantina",address:""},
+    {name:"McAvoy's",address:""},
+    {name:"Red Eye",address:""},
+    {name:"Rumor Reel",address:""},
+    {name:"Stables",address:""}
+  ]
+};
+function venueName(v){return typeof v==="string"?v:v.name;}
+function venueAddr(v){return typeof v==="string"?"":v.address||"";}
+const COLORS=["p0","p1","p2","p3","p4","p5"];
+function pillColor(b){return COLORS[Math.max(0,S.bands.indexOf(b))%COLORS.length];}
+
+// ── DATA (stored as gigs.json at repo root — no subfolder needed) ──────────
+function openGigInfo(ds,idx){
+  var gig=S.gigs[ds][idx];
+  var d=new Date(ds+"T12:00:00");
+  document.getElementById("gigInfoDate").textContent=d.toLocaleDateString("default",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  document.getElementById("gigInfoBand").textContent=gig.band;
+  document.getElementById("gigInfoVenue").textContent=gig.venue;
+  // find address
+  var addr="";
+  for(var i=0;i<S.venues.length;i++){if(venueName(S.venues[i])===gig.venue){addr=venueAddr(S.venues[i]);break;}}
+  var addrEl=document.getElementById("gigInfoAddr");
+  addrEl.textContent=addr||"";
+  addrEl.style.display=addr?"":"none";
+  document.getElementById("gigInfoTime").textContent=gig.time?("Doors / Show: "+fmtTime(gig.time)):"";
+  document.getElementById("gigInfoTime").style.display=gig.time?"":"none";
+  var notesEl=document.getElementById("gigInfoNotes");
+  notesEl.textContent=gig.notes||"";
+  notesEl.style.display=gig.notes?"":"none";
+  // map button
+  var mapBtn=document.getElementById("gigInfoMapBtn");
+  var mapLink=document.getElementById("gigInfoMapLink");
+  var query=addr||(gig.venue);
+  mapLink.href="https://maps.google.com/?q="+encodeURIComponent(query);
+  mapBtn.style.display="block";
+  // other gigs same day
+  var allDay=S.gigs[ds]||[];
+  var others=allDay.filter(function(_,i2){return i2!==idx;});
+  var multiEl=document.getElementById("gigInfoMulti");
+  var multiList=document.getElementById("gigInfoMultiList");
+  if(others.length>0){
+    multiEl.style.display="block";
+    multiList.innerHTML="";
+    others.forEach(function(g){
+      var row=document.createElement("div");
+      row.style.cssText="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;";
+      row.innerHTML='<span style="font-weight:500">'+g.band+'</span><span style="color:var(--text2)">'+g.venue+'</span>';
+      multiList.appendChild(row);
+    });
+  } else { multiEl.style.display="none"; }
+  // show/hide edit button
+  var editBtn=document.getElementById("gigInfoEditBtn");
+  if(editBtn) editBtn.style.display=S.authed?"inline-block":"none";
+  S._infoDs=ds; S._infoIdx=idx;
+  // show panel
+  document.getElementById("gigInfoOverlay").style.display="block";
+  var panel=document.getElementById("gigInfoPanel");
+  panel.style.display="block";
+  setTimeout(function(){panel.style.bottom="0";},10);
+}
+
+function gigInfoEdit(){
+  closeGigInfo();
+  setTimeout(function(){openEditGig(S._infoDs,S._infoIdx);},320);
+}
+function closeGigInfo(){
+  var panel=document.getElementById("gigInfoPanel");
+  panel.style.bottom="-100%";
+  setTimeout(function(){
+    panel.style.display="none";
+    document.getElementById("gigInfoOverlay").style.display="none";
+  },300);
+}
+
+async function loadData(){
+  try{
+    const url=`https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_FILE}`;
+    const res=await fetch(url,{headers:{Accept:"application/vnd.github.v3+json"}});
+    if(res.status===404){
+      S.bands=[...DEFAULTS.bands];S.venues=[...DEFAULTS.venues];S.sha=null;
+    } else {
+      const j=await res.json();
+      S.sha=j.sha;
+      const d=JSON.parse(atob(j.content.replace(/\n/g,"")));
+      S.gigs=d.gigs||{};
+      S.bands=(d.bands&&d.bands.length)?d.bands:[...DEFAULTS.bands];
+      var rawV=(d.venues&&d.venues.length)?d.venues:DEFAULTS.venues;
+      S.venues=rawV.map(function(v){return typeof v==="string"?{name:v,address:""}:v;});
+      // If file existed but bands/venues empty, save defaults back immediately
+      if((!d.bands||!d.bands.length)||(!d.venues||!d.venues.length)){
+        S._needsDefaultSave=true;
+      }
+    }
+  } catch(e){
+    S.bands=[...DEFAULTS.bands];S.venues=[...DEFAULTS.venues];
+    console.error("loadData error:",e);
+  }
+  renderAll();
+  if(S._needsDefaultSave&&S.pat){saveData();S._needsDefaultSave=false;}
+}
+
+async function saveData(){
+  if(!S.pat)return;
+  showBanner("Saving...","saving");
+  const payload=JSON.stringify({gigs:S.gigs,bands:S.bands,venues:S.venues},null,2);
+  const content=btoa(unescape(encodeURIComponent(payload)));
+  const body={message:"Update gig data",content};
+  if(S.sha)body.sha=S.sha;
+  try{
+    const url=`https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_FILE}`;
+    const res=await fetch(url,{
+      method:"PUT",
+      headers:{Authorization:"token "+S.pat,Accept:"application/vnd.github.v3+json","Content-Type":"application/json"},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok){const err=await res.json();throw new Error(err.message||res.status);}
+    const j=await res.json();
+    S.sha=j.content&&j.content.sha?j.content.sha:S.sha;
+    showBanner("Saved!","ok");setTimeout(hideBanner,2500);
+  } catch(e){
+    console.error("saveData error:",e);
+    showBanner("Save failed: "+e.message+" — check PAT has Contents read+write scope","err");
+  }
+}
+
+function showBanner(msg,type){
+  const b=document.getElementById("saveBanner"),m=document.getElementById("saveBannerMsg");
+  const s={
+    saving:{bg:"#fdf4e0",border:"#d4a020",color:"#8a5e0a"},
+    ok:{bg:"#e4f5ec",border:"#3aaa6a",color:"#1e6b40"},
+    err:{bg:"#fdeee9",border:"#d95f38",color:"#9a3820"}
+  };
+  const t=s[type]||s.saving;
+  b.style.cssText="display:block;background:"+t.bg+";border:1px solid "+t.border+";color:"+t.color+";padding:11px 20px;font-size:13px;margin:10px 20px 0;border-radius:var(--radius)";
+  m.textContent=msg;
+}
+function hideBanner(){document.getElementById("saveBanner").style.display="none";}
+function renderAll(){updateFilterDropdown();document.getElementById("filterBar").style.display=S.view==="cal"?"block":"none";renderCalendar();if(S.view==="manage")renderManage();}
+
+function updateFilterDropdown(){
+  var sel=document.getElementById("bandFilter");
+  var prev=sel.value;
+  sel.innerHTML="<option value='ALL'>All bands</option>";
+  for(var i=0;i<S.bands.length;i++){
+    var o=document.createElement("option");
+    o.value=S.bands[i];
+    o.textContent=S.bands[i];
+    sel.appendChild(o);
+  }
+  sel.value=(prev&&(prev==="ALL"||S.bands.indexOf(prev)>-1))?prev:"ALL";
+  S.filter=sel.value;
+}
+function applyFilter(){
+  S.filter=document.getElementById("bandFilter").value;
+  renderCalendar();
+}
+function renderCalendar(){
+  document.getElementById("monthLabel").textContent=new Date(S.year,S.month,1).toLocaleString("default",{month:"long",year:"numeric"}).toUpperCase();
+  const firstDow=new Date(S.year,S.month,1).getDay();
+  const dim=new Date(S.year,S.month+1,0).getDate();
+  const today=fmtDate(new Date());
+  let html="";
+  for(let i=0;i<firstDow;i++){
+    const p=new Date(S.year,S.month,1-firstDow+i);
+    html+='<div class="day-cell other-month"><div class="day-num">'+p.getDate()+'</div></div>';
+  }
+  for(let d=1;d<=dim;d++){
+    const ds=S.year+"-"+pad(S.month+1)+"-"+pad(d);
+    const isToday=(ds===today);
+    var allGigs=S.gigs[ds]||[];var dg=S.filter==="ALL"?allGigs:allGigs.filter(function(g){return g.band===S.filter;});
+    const c=S.authed?" clickable":"";
+    var cl=S.authed?" onclick=\"openAddGig('"+ds+"')\"":"";
+    let gh="";
+    for(let i=0;i<dg.length;i++){
+      const g=dg[i];
+      const t=g.time?fmtTime(g.time):"";
+      const tip=g.band+" @ "+g.venue+(t?" - "+t:"");
+            var ec=" onclick=\"event.stopPropagation();openGigInfo('"+ds+"',"+i+")\"";
+      gh+='<div class="gig-pill '+pillColor(g.band)+'" title="'+tip+'"'+ec+'>'+g.band+'<br><span style="opacity:.7;font-size:9px">'+g.venue+(t?" - "+t:"")+'</span></div>';
+    }
+    const hint=(S.authed&&!dg.length)?'<div class="add-hint">+ add gig</div>':"";
+    html+='<div class="day-cell'+c+(isToday?" today":"")+'"'+cl+'><div class="day-num">'+d+'</div>'+gh+hint+'</div>';
+  }
+  const tr=(firstDow+dim)%7;
+  for(let i=0;i<(tr?7-tr:0);i++)html+='<div class="day-cell other-month"><div class="day-num">'+(i+1)+'</div></div>';
+  document.getElementById("calGrid").innerHTML=html;
+}
+
+function renderManage(){
+  var can=S.authed;
+  var bl=document.getElementById("bandList");
+  var vl=document.getElementById("venueList");
+  bl.innerHTML="";
+  vl.innerHTML="";
+  if(S.bands.length===0){
+    bl.innerHTML='<div class="empty-list">No bands yet</div>';
+  } else {
+    for(var i=0;i<S.bands.length;i++){
+      var row=document.createElement("div");
+      row.className="list-item";
+      var sp=document.createElement("span");
+      sp.textContent=S.bands[i];
+      row.appendChild(sp);
+      if(can){
+        var btn=document.createElement("button");
+        btn.className="del-btn";
+        btn.innerHTML="&#10005;";
+        btn.setAttribute("onclick","removeBand("+i+")");
+        row.appendChild(btn);
+      }
+      bl.appendChild(row);
+    }
+  }
+  if(S.venues.length===0){
+    vl.innerHTML='<div class="empty-list">No venues yet</div>';
+  } else {
+    for(var j=0;j<S.venues.length;j++){
+      var v=S.venues[j];
+      var vn=venueName(v);
+      var va=venueAddr(v);
+      var row2=document.createElement("div");
+      row2.className="venue-item";
+      var left=document.createElement("div");
+      left.className="venue-item-left";
+      var nameEl=document.createElement("div");
+      nameEl.className="venue-name";
+      nameEl.textContent=vn;
+      left.appendChild(nameEl);
+      if(can){
+        var addrInp=document.createElement("input");
+        addrInp.type="text";
+        addrInp.className="venue-addr-input";
+        addrInp.placeholder="Enter address...";
+        addrInp.value=va;
+        addrInp.setAttribute("data-idx",j);
+        addrInp.setAttribute("onblur","saveVenueAddr("+j+",this.value)");
+        left.appendChild(addrInp);
+      } else if(va){
+        var addrEl=document.createElement("div");
+        addrEl.className="venue-addr-text";
+        addrEl.textContent=va;
+        left.appendChild(addrEl);
+      }
+      row2.appendChild(left);
+      if(can){
+        var btn2=document.createElement("button");
+        btn2.className="del-btn";
+        btn2.innerHTML="&#10005;";
+        btn2.setAttribute("onclick","removeVenue("+j+")");
+        row2.appendChild(btn2);
+      }
+      vl.appendChild(row2);
+    }
+  }
+  document.getElementById("addBandRow").style.display=can?"flex":"none";
+  document.getElementById("addVenueRow").style.display=can?"flex":"none";
+}
+
+function changeMonth(dir){S.month+=dir;if(S.month>11){S.month=0;S.year++;}if(S.month<0){S.month=11;S.year--;}renderCalendar();}
+function switchView(v,btn){S.view=v;document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});btn.classList.add("active");document.getElementById("calView").style.display=v==="cal"?"block":"none";document.getElementById("manageView").style.display=v==="manage"?"block":"none";document.getElementById("filterBar").style.display=v==="cal"?"block":"none";if(v==="manage")renderManage();}
+
+function handleAdminBtn(){
+  if(S.authed){
+    S.authed=false;S.pat=null;
+    document.getElementById("authBadge").style.display="none";
+    document.getElementById("adminBtn").innerHTML="&#128274; Admin";document.getElementById("manageTab").style.display="none";if(S.view==="manage"){switchView("cal",document.querySelector(".tab.active")||document.querySelector(".tab"));}
+    renderAll();
+  } else {
+    document.getElementById("pwInput").value="";
+    document.getElementById("patInput").value="";
+    document.getElementById("pwErr").textContent="";
+    document.getElementById("authOverlay").style.display="flex";
+    setTimeout(function(){document.getElementById("pwInput").focus();},50);
+  }
+}
+function closeAuth(){document.getElementById("authOverlay").style.display="none";}
+function submitAuth(){
+  var pw=document.getElementById("pwInput").value;
+  var pat=document.getElementById("patInput").value.trim();
+  if(pw!==CONFIG.ADMIN_PASSWORD){document.getElementById("pwErr").textContent="Incorrect password.";return;}
+  if(!pat){document.getElementById("pwErr").textContent="Please enter your GitHub token.";return;}
+  S.authed=true;S.pat=pat;
+  document.getElementById("authBadge").style.display="";
+  document.getElementById("adminBtn").innerHTML="&#128275; Log out";document.getElementById("manageTab").style.display="";
+  closeAuth();renderAll();
+}
+
+function populateSelects(){
+  document.getElementById("gigBandSel").innerHTML=S.bands.map(function(b){return '<option value="'+b+'">'+b+'</option>';}).join("");
+  document.getElementById("gigVenueSel").innerHTML=S.venues.map(function(v){var n=venueName(v);return'<option value="'+n+'">'+n+'</option>';}).join("");
+}
+function openAddGig(ds){
+  if(!S.authed)return;
+  S.editDate=ds;S.editIdx=null;
+  document.getElementById("gigModalTitle").textContent="Add Gig";
+  document.getElementById("gigModalSub").textContent=new Date(ds+"T12:00:00").toLocaleDateString("default",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  populateSelects();
+  document.getElementById("gigTime").value="20:00";
+  document.getElementById("gigNotes").value="";
+  document.getElementById("delGigBtn").style.display="none";
+  document.getElementById("gigStatusLine").textContent="";
+  document.getElementById("gigOverlay").style.display="flex";
+}
+function openEditGig(ds,idx){
+  if(!S.authed)return;
+  S.editDate=ds;S.editIdx=idx;
+  var g=S.gigs[ds][idx];
+  document.getElementById("gigModalTitle").textContent="Edit Gig";
+  document.getElementById("gigModalSub").textContent=new Date(ds+"T12:00:00").toLocaleDateString("default",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  populateSelects();
+  document.getElementById("gigBandSel").value=g.band;
+  document.getElementById("gigVenueSel").value=g.venue;
+  document.getElementById("gigTime").value=g.time||"20:00";
+  document.getElementById("gigNotes").value=g.notes||"";
+  document.getElementById("delGigBtn").style.display="";
+  document.getElementById("gigStatusLine").textContent="";
+  document.getElementById("gigOverlay").style.display="flex";
+}
+function closeGig(){document.getElementById("gigOverlay").style.display="none";}
+
+async function saveGig(){
+  var gig={
+    band:document.getElementById("gigBandSel").value,
+    venue:document.getElementById("gigVenueSel").value,
+    time:document.getElementById("gigTime").value,
+    notes:document.getElementById("gigNotes").value.trim()
+  };
+  var ds=S.editDate;
+  if(!S.gigs[ds])S.gigs[ds]=[];
+  if(S.editIdx!==null)S.gigs[ds][S.editIdx]=gig;
+  else S.gigs[ds].push(gig);
+  closeGig();renderCalendar();
+  await saveData();
+}
+async function deleteGig(){
+  if(!confirm("Delete this gig?"))return;
+  S.gigs[S.editDate].splice(S.editIdx,1);
+  if(!S.gigs[S.editDate].length)delete S.gigs[S.editDate];
+  closeGig();renderCalendar();
+  await saveData();
+}
+function addBand(){
+  var v=document.getElementById("newBandInput").value.trim();if(!v)return;
+  S.bands.push(v);S.bands.sort(function(a,b){return a.localeCompare(b);});
+  document.getElementById("newBandInput").value="";
+  renderManage();saveData();
+}
+function removeBand(i){
+  if(!confirm('Remove "'+S.bands[i]+'"?'))return;
+  S.bands.splice(i,1);renderManage();saveData();
+}
+function addVenue(){
+  var v=document.getElementById("newVenueInput").value.trim();if(!v)return;
+  S.venues.push({name:v,address:""});
+  S.venues.sort(function(a,b){return venueName(a).localeCompare(venueName(b));});
+  document.getElementById("newVenueInput").value="";
+  renderManage();saveData();
+}
+function saveVenueAddr(idx,addr){
+  if(S.venues[idx]){S.venues[idx].address=addr.trim();saveData();}
+}
+function removeVenue(i){
+  if(!confirm('Remove "'+S.venues[i]+'"?'))return;
+  S.venues.splice(i,1);renderManage();saveData();
+}
+function fmtDate(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function pad(n){return String(n).padStart(2,"0");}
+function fmtTime(t){if(!t)return"";var h=parseInt(t),m=t.split(":")[1];return(h%12||12)+":"+m+(h>=12?"pm":"am");}
+
+loadData();
+</script>
+</body>
+</html>
