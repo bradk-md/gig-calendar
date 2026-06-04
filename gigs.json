@@ -129,21 +129,69 @@
     "The Regal Beagles"
   ],
   "venues": [
-    "Amvets DE",
-    "Baileys on the Bay",
-    "Bare Bones",
-    "Bowley's on the Bay",
-    "Club 66",
-    "Encore",
-    "Fish Head Cantina",
-    "Frederick Road Friday",
-    "Laurem Woods",
-    "McAvoy's",
-    "Music on Main Reisterstown",
-    "Reckless Shepherd",
-    "Red Eye",
-    "Rumor Reel",
-    "Stables",
-    "Vera Sands Marina"
+    {
+      "name": "Amvets DE",
+      "address": ""
+    },
+    {
+      "name": "Baileys on the Bay",
+      "address": ""
+    },
+    {
+      "name": "Bare Bones",
+      "address": ""
+    },
+    {
+      "name": "Bowley's on the Bay",
+      "address": ""
+    },
+    {
+      "name": "Club 66",
+      "address": ""
+    },
+    {
+      "name": "Encore",
+      "address": ""
+    },
+    {
+      "name": "Fish Head Cantina",
+      "address": ""
+    },
+    {
+      "name": "Frederick Road Friday",
+      "address": ""
+    },
+    {
+      "name": "Laurem Woods",
+      "address": ""
+    },
+    {
+      "name": "McAvoy's",
+      "address": ""
+    },
+    {
+      "name": "Music on Main Reisterstown",
+      "address": ""
+    },
+    {
+      "name": "Reckless Shepherd",
+      "address": ""
+    },
+    {
+      "name": "Red Eye",
+      "address": ""
+    },
+    {
+      "name": "Rumor Reel",
+      "address": ""
+    },
+    {
+      "name": "Stables",
+      "address": ""
+    },
+    {
+      "name": "Vera Sands Marina",
+      "address": ""
+    }
   ]
 }
