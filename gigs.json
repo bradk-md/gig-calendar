@@ -60,6 +60,7 @@
       {
         "band": "Fizz",
         "venue": "Stables",
+        "doors": "18:00",
         "time": "20:00",
         "notes": "Doors open at 6PM"
       }
