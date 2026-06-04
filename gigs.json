@@ -1,14 +1,5 @@
 {
-  "gigs": {
-    "2026-06-25": [
-      {
-        "band": "Betty White Stripes",
-        "venue": "Baileys on the Bay",
-        "time": "20:00",
-        "notes": ""
-      }
-    ]
-  },
+  "gigs": {},
   "bands": [
     "Betty White Stripes",
     "Fizz",
