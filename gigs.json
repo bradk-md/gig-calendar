@@ -47,6 +47,14 @@
         "time": "18:00",
         "notes": "6-8 PM"
       }
+    ],
+    "2026-06-27": [
+      {
+        "band": "Fizz",
+        "venue": "McAvoy's",
+        "time": "20:30",
+        "notes": ""
+      }
     ]
   },
   "bands": [
